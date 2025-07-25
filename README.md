@@ -12,4 +12,4 @@
 - 显示位置精确度
 
 ## 构建状态
-[![Android CI](https://github.com/[你的用户名]/[仓库名]/actions/workflows/android.yml/badge.svg)](https://github.com/[你的用户名]/[仓库名]/actions/workflows/android.yml)
+[![Android CI](https://github.com/daiqinzheng/gps-location-app/actions/workflows/android.yml/badge.svg)](https://github.com/daiqinzheng/gps-location-app/actions/workflows/android.yml)
