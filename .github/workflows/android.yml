@@ -30,12 +30,24 @@ jobs:
       
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: 7.5
+
+    - name: Download Gradle Distributions
+      run: |
+        mkdir -p ~/.gradle/wrapper/dists/gradle-7.5-bin/
+        wget -q https://downloads.gradle-dn.com/distributions/gradle-7.5-bin.zip -O ~/.gradle/wrapper/dists/gradle-7.5-bin/gradle-7.5-bin.zip
       
     - name: Build with Gradle
-      run: ./gradlew build --scan --stacktrace
+      env:
+        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2"
+        JAVA_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
+      run: ./gradlew build --no-daemon --stacktrace
       
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace
+      env:
+        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2"
+      run: ./gradlew assembleDebug --no-daemon --stacktrace
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
