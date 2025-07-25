@@ -52,10 +52,9 @@ jobs:
       
     - name: Build with Gradle
       env:
-        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Xmx4g -Dorg.gradle.parallel=true -Dgradle.user.home=$HOME/.gradle"
-        JAVA_OPTS: "-Dhttp.proxyHost= -Dhttp.proxyPort= -Dhttps.proxyHost= -Dhttps.proxyPort="
+        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Xmx4g -Dorg.gradle.parallel=true"
       run: |
-        ./gradlew --no-daemon --info assembleDebug
+        ./gradlew assembleDebug --info
       
     - name: Upload build reports
       if: always()
