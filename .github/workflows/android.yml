@@ -28,26 +28,40 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
       
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
       with:
         gradle-version: 7.5
-
-    - name: Download Gradle Distributions
-      run: |
-        mkdir -p ~/.gradle/wrapper/dists/gradle-7.5-bin/
-        wget -q https://downloads.gradle-dn.com/distributions/gradle-7.5-bin.zip -O ~/.gradle/wrapper/dists/gradle-7.5-bin/gradle-7.5-bin.zip
+        cache-disabled: false
+        gradle-home-cache-cleanup: true
       
     - name: Build with Gradle
       env:
-        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2"
-        JAVA_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
-      run: ./gradlew build --no-daemon --stacktrace
+        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx4g"
+      run: |
+        ./gradlew clean
+        ./gradlew build --stacktrace
       
     - name: Build Debug APK
-      env:
-        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2"
-      run: ./gradlew assembleDebug --no-daemon --stacktrace
+      run: ./gradlew assembleDebug --stacktrace
+      
+    - name: Upload build reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-reports
+        path: app/build/reports
+        retention-days: 30
       
     - name: Upload APK
       uses: actions/upload-artifact@v4
