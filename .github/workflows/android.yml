@@ -22,10 +22,12 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: 7.5
+    - name: Setup Gradle Wrapper
+      run: |
+        wget -q https://services.gradle.org/distributions/gradle-7.5-bin.zip
+        mkdir -p $HOME/.gradle/wrapper/dists/gradle-7.5-bin/
+        unzip -q gradle-7.5-bin.zip -d $HOME/.gradle/wrapper/dists/gradle-7.5-bin/
+        rm gradle-7.5-bin.zip
 
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
@@ -39,12 +41,21 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+
+    - name: Update Gradle Wrapper properties
+      run: |
+        echo "distributionUrl=https\\://services.gradle.org/distributions/gradle-7.5-bin.zip" > gradle/wrapper/gradle-wrapper.properties
+        echo "distributionBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+        echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+        echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+        echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
       
     - name: Build with Gradle
       env:
-        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Xmx4g -Dorg.gradle.parallel=true"
+        GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Xmx4g -Dorg.gradle.parallel=true -Dgradle.user.home=$HOME/.gradle"
+        JAVA_OPTS: "-Dhttp.proxyHost= -Dhttp.proxyPort= -Dhttps.proxyHost= -Dhttps.proxyPort="
       run: |
-        ./gradlew assembleDebug --build-cache --stacktrace
+        ./gradlew --no-daemon --info assembleDebug
       
     - name: Upload build reports
       if: always()
